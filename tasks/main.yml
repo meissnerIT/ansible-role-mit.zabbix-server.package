@@ -32,7 +32,7 @@
 - name: Add (disabled) local-repo_zabbix_com_zabbix.list
   template:
     src: local-repo.zabbix.com-zabbix.list
-    dest: /etc/apt/sources.list.d/
+    dest: /etc/apt/sources.list.d/local-repo.zabbix.com-zabbix.list.disabled
 
 - name: Copy php-fpm configuration
   copy:
