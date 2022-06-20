@@ -29,6 +29,10 @@
     repo: "{{ apt_repository_zabbix }}"
     state: absent
   changed_when: no
+- name: Remove local-repo_zabbix_com_zabbix.list
+  file:
+    path: /etc/apt/sources.list.d/local-repo.zabbix.com-zabbix.list
+    state: absent
 - name: Add (disabled) local-repo_zabbix_com_zabbix.list
   template:
     src: local-repo.zabbix.com-zabbix.list
