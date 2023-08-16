@@ -1,0 +1,10 @@
+---
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Update zabbix-server.service WantedBy
+  # ansible.builtin.systemd will not execute if serivce is already enabled
+  command: systemctl enable zabbix-server.service
+
