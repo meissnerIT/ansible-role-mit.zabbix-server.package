@@ -38,7 +38,7 @@
 - name: Copy php-fpm configuration
   copy:
     src: php-fpm-zabbix.conf
-    dest: /etc/php/7.4/fpm/pool.d/zabbix.conf
+    dest: /etc/php/8.2/fpm/pool.d/zabbix.conf
 - name: Copy nginx configuration
   copy: 
     src: local-mit-zabbix-frontend-{{ zabbix_server_major_version }}.include
