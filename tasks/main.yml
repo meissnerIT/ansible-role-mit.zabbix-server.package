@@ -1,42 +1,39 @@
 ---
-
-- set_fact:
+- ansible.builtin.set_fact:
     zabbix_server_major_version: "{{ zabbix_server_version | regex_replace('^([0-9]+\\.[0-9]+)(.*)$', '\\1') }}"
-- set_fact:
-    zabbix_server_package: "1:{{ zabbix_server_version }}+{{ ansible_distribution|lower + ansible_distribution_major_version }}"
-- set_fact:
-    zabbix_frontend_php_package: "1:{{ zabbix_server_version }}+{{ ansible_distribution|lower + ansible_distribution_major_version }}"
+- ansible.builtin.set_fact:
+    zabbix_server_package: 1:{{ zabbix_server_version }}+{{ ansible_distribution | lower + ansible_distribution_major_version }}
+- ansible.builtin.set_fact:
+    zabbix_frontend_php_package: 1:{{ zabbix_server_version }}+{{ ansible_distribution | lower + ansible_distribution_major_version }}
 
 - name: Remove deprecated files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
     - /etc/apt/sources.list.d/local-repo.zabbix.com-zabbix.list.disabled
     - /usr/share/keyrings/zabbix-official-repo.gpg
 
-- include_tasks: install.yml
-
+- ansible.builtin.include_tasks: install.yml
 - name: Copy php-fpm configuration
-  copy:
+  ansible.builtin.copy:
     src: php-fpm-zabbix.conf
     dest: /etc/php/8.2/fpm/pool.d/zabbix.conf
 - name: Copy nginx configuration
-  copy: 
+  ansible.builtin.copy:
     src: local-mit-zabbix-frontend-{{ zabbix_server_major_version }}.include
     dest: /etc/nginx/conf.d/local-mit-zabbix-frontend.include
 
 #21395: Ensure Zabbix is stopped and started with database
 - name: Create /etc/systemd/system/zabbix-server.service.d
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/zabbix-server.service.d
     state: directory
 - name: Add systemd dependency to mariadb.service
-  copy:
+  ansible.builtin.copy:
     src: etc/systemd/system/zabbix-server.service.d/override.conf
     dest: /etc/systemd/system/zabbix-server.service.d/override.conf
   notify:
     - Reload systemd
     # Create symlink /etc/systemd/system/mariadb.service.wants/zabbix-server.service → /lib/systemd/system/zabbix-server.service.
     - Update zabbix-server.service WantedBy
-

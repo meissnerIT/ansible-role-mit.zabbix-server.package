@@ -1,57 +1,57 @@
 ---
-
 # mit-ansible-install-package-from-apt-source
 # 2023-10-12: Initial version
+# 2024-09-18: Cosmetic updates (ansible-lint)
 
-- set_fact:
+- ansible.builtin.set_fact:
     ansible_role_name: mit.zabbix-server.package
     apt_keyrings: /etc/apt/keyrings
     # used for filenames
     visible_name: zabbix-official-repo
-- set_fact:
+- ansible.builtin.set_fact:
     local_apt_key: "{{ apt_keyrings }}/{{ visible_name }}.gpg"
-- set_fact:
+- ansible.builtin.set_fact:
     apt_package: zabbix-server-mysql={{ zabbix_server_package }},zabbix-frontend-php={{ zabbix_frontend_php_package }}
     apt_source_list_name: local-{{ visible_name }}.list
-    apt_repository: "deb [signed-by={{ local_apt_key }}] https://repo.zabbix.com/zabbix/{{ zabbix_server_major_version }}/debian {{ ansible_distribution_release }} main"
+    apt_repository: deb [signed-by={{ local_apt_key }}] https://repo.zabbix.com/zabbix/{{ zabbix_server_major_version }}/debian {{ ansible_distribution_release }}
+      main
     gpg_key_src: https://repo.zabbix.com/zabbix-official-repo.key
 
 # No need to change anything beyond this line
 
 - name: Create {{ apt_keyrings }}
-  file:
+  ansible.builtin.file:
     path: "{{ apt_keyrings }}"
     state: directory
 - name: Install gpg
-  apt:
+  ansible.builtin.apt:
     pkg: gpg
 - name: Add apt gpg key
-  shell: "wget -q -O - {{ gpg_key_src }} | gpg --dearmor > {{ local_apt_key }}"
+  ansible.builtin.shell: wget -q -O - {{ gpg_key_src }} | gpg --dearmor > {{ local_apt_key }}
   args:
     creates: "{{ local_apt_key }}"
   environment: "{{ proxy_env }}"
 - name: Enable apt repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "{{ apt_repository }}"
     state: present
-  changed_when: no
+  changed_when: false
 - name: Install {{ apt_package }}
-  apt:
-    name: '{{ apt_package }}'
-    update_cache: yes
+  ansible.builtin.apt:
+    name: "{{ apt_package }}"
+    update_cache: true
     state: present
 - name: Deactivate apt repository
-  apt_repository:
-    repo: '{{ apt_repository }}'
+  ansible.builtin.apt_repository:
+    repo: "{{ apt_repository }}"
     state: absent
-  changed_when: no
+  changed_when: false
 - name: Remove /etc/apt/sources.list.d/{{ apt_source_list_name }}
-  file:
+  ansible.builtin.file:
     path: /etc/apt/sources.list.d/{{ apt_source_list_name }}
     state: absent
 - name: Add {{ apt_source_list_name }}.disabled
-  template:
+  ansible.builtin.template:
     src: local-apt.list
     dest: /etc/apt/sources.list.d/{{ apt_source_list_name }}.disabled
-  changed_when: no
-
+  changed_when: false
