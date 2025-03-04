@@ -32,6 +32,13 @@
     dest: /etc/nginx/conf.d/local-mit-zabbix-frontend.include
     mode: "644"
 
+- name: Set permissions on /etc/zabbix/web/zabbix.conf.php
+  ansible.builtin.file:
+    path: /etc/zabbix/web/zabbix.conf.php
+    owner: root
+    group: www-data
+    mode: "640"
+
 # #21395: Ensure Zabbix is stopped and started with database
 - name: Create /etc/systemd/system/zabbix-server.service.d
   ansible.builtin.file:
