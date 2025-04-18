@@ -3,6 +3,12 @@
   ansible.builtin.systemd:
     daemon_reload: true
 
-- name: Update zabbix-server.service WantedBy
+- name: Update zabbix-server.service WantedBy # noqa: command-instead-of-module no-changed-when
   # ansible.builtin.systemd will not execute if serivce is already enabled
   ansible.builtin.command: systemctl enable zabbix-server.service
+
+- name: Restart zabbix-server
+  ansible.builtin.service:
+    name: zabbix-server
+    state: restarted
+  listen: apt-package-has-been-changed
