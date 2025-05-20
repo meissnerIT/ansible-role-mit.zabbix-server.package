@@ -17,8 +17,41 @@
     - /etc/apt/sources.list.d/local-repo.zabbix.com-zabbix.list.disabled
     - /usr/share/keyrings/zabbix-official-repo.gpg
 
+- name: Hold zabbix-agent package
+  ansible.builtin.dpkg_selections:
+    name: zabbix-agent
+    selection: hold
+  changed_when: false
+
+## Install package ============================================================
+
+- name: Set defaults
+  ansible.builtin.set_fact:
+    apt_keyrings: /etc/apt/keyrings
+    # used for filenames
+    visible_name: zabbix-official-repo
+- name: Set defaults
+  ansible.builtin.set_fact:
+    local_apt_key: "{{ apt_keyrings }}/{{ visible_name }}.gpg"
+- name: Set defaults
+  ansible.builtin.set_fact:
+    apt_package: zabbix-server-mysql={{ zabbix_server_package }},zabbix-frontend-php={{ zabbix_frontend_php_package }}
+    apt_source_list_name: local-{{ visible_name }}.list
+    apt_repository:
+      deb [signed-by={{ local_apt_key }}] https://repo.zabbix.com/zabbix/{{ zabbix_server_major_version }}/stable/debian {{ ansible_distribution_release }}
+      main
+    gpg_key_src: https://repo.zabbix.com/zabbix-official-repo.key
+
 - name: Install zabbix
   ansible.builtin.include_tasks: install.yml
+
+## Configure ==================================================================
+
+- name: Unhold zabbix-agent package
+  ansible.builtin.dpkg_selections:
+    name: zabbix-agent
+    selection: install
+  changed_when: false
 
 - name: Copy php-fpm configuration
   ansible.builtin.copy:

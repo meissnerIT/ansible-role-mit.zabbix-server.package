@@ -1,28 +1,11 @@
 ---
-# mit-ansible-install-package-from-apt-source 2025-01-11
+# mit-ansible-install-package-from-apt-source 2025-04-01
 # 2023-10-12: Initial version
 # 2024-09-18: Cosmetic updates (ansible-lint)
 # 2024-09-19: Added handler "apt-package-has-been-changed"
 # 2025-01-11: Cosmetic updates (Removed ansible-lint warnings)
 # 2025-01-23: Added executable to "Add apt gpg key"
-
-- name: Set defaults
-  ansible.builtin.set_fact:
-    ansible_role_name: mit.zabbix-server.package
-    apt_keyrings: /etc/apt/keyrings
-    # used for filenames
-    visible_name: zabbix-official-repo
-- name: Set defaults
-  ansible.builtin.set_fact:
-    local_apt_key: "{{ apt_keyrings }}/{{ visible_name }}.gpg"
-- name: Set defaults
-  ansible.builtin.set_fact:
-    apt_package: zabbix-server-mysql={{ zabbix_server_package }},zabbix-frontend-php={{ zabbix_frontend_php_package }}
-    apt_source_list_name: local-{{ visible_name }}.list
-    apt_repository:
-      deb [signed-by={{ local_apt_key }}] https://repo.zabbix.com/zabbix/{{ zabbix_server_major_version }}/stable/debian {{ ansible_distribution_release }}
-      main
-    gpg_key_src: https://repo.zabbix.com/zabbix-official-repo.key
+# 2025-04-01: Removed all variables
 
 # No need to change anything beyond this line
 
@@ -34,8 +17,8 @@
 - name: Install gpg
   ansible.builtin.apt:
     pkg: gpg
-- name: Add apt gpg key
-  ansible.builtin.shell: set -o pipefail && wget -q -O - {{ gpg_key_src }} | gpg --dearmor > {{ local_apt_key }}
+- name: Add apt gpg key # noqa: risky-shell-pipe command-instead-of-module
+  ansible.builtin.shell: wget -q -O - {{ gpg_key_src }} | gpg --dearmor > {{ local_apt_key }}
   args:
     creates: "{{ local_apt_key }}"
     executable: /bin/bash
