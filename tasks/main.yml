@@ -7,7 +7,8 @@
     zabbix_server_package: 1:{{ zabbix_server_version }}+{{ ansible_distribution | lower + ansible_distribution_major_version }}
 - name: Set zabbix_frontend_php_package
   ansible.builtin.set_fact:
-    zabbix_frontend_php_package: 1:{{ zabbix_frontend_version | default(zabbix_server_version) }}+{{ ansible_distribution | lower + ansible_distribution_major_version }}
+    zabbix_frontend_php_package: >
+      1:{{ zabbix_frontend_version | default(zabbix_server_version) }}+{{ ansible_distribution | lower + ansible_distribution_major_version }}
 
 - name: Remove deprecated files
   ansible.builtin.file:
@@ -54,7 +55,7 @@
   changed_when: false
 
 - name: Copy php-fpm configuration
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src: php-fpm-zabbix.conf
     dest: /etc/php/8.2/fpm/pool.d/zabbix.conf
     mode: "644"
